@@ -1,0 +1,38 @@
+{
+  "name": "@moritzbrantner/game-audio",
+  "version": "0.1.0",
+  "description": "Shared game audio director (Rust/wasm) on the browser Web Audio API, with first-gesture unlock and hidden-tab suspension",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moritzbrantner/game-audio.git"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./wasm": {
+      "types": "./pkg/game_audio_wasm.d.ts",
+      "default": "./pkg/game_audio_wasm.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "pkg/game_audio_wasm.js",
+    "pkg/game_audio_wasm.d.ts",
+    "pkg/game_audio_wasm_bg.wasm",
+    "pkg/game_audio_wasm_bg.wasm.d.ts",
+    "README.md",
+    "LICENSE-MIT",
+    "LICENSE-APACHE"
+  ],
+  "scripts": {
+    "test": "bun test"
+  }
+}

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>game-audio demo</title>
+    <style>
+      body { font: 15px system-ui, sans-serif; margin: 2rem; max-width: 40rem; }
+      button { margin: 0.25rem; padding: 0.5rem 0.9rem; }
+      output { display: block; margin-top: 1rem; font-family: ui-monospace, monospace; white-space: pre; }
+    </style>
+  </head>
+  <body>
+    <h1>game-audio demo</h1>
+    <p>Generated test tones; the first click unlocks audio. Serve this directory after <code>scripts/build-web.sh</code>.</p>
+    <div>
+      <button data-cue="ui.click">UI click</button>
+      <button data-cue="combat.hit" data-x="-6">Hit (left)</button>
+      <button data-cue="combat.hit" data-x="0">Hit (centre)</button>
+      <button data-cue="combat.hit" data-x="6">Hit (right)</button>
+      <button data-cue="combat.hit" data-x="11">Hit (far right)</button>
+      <button data-cue="player.hurt">Hurt</button>
+      <button id="replay">Replay last key</button>
+      <button id="mute">Toggle mute</button>
+    </div>
+    <output id="log">loading…</output>
+    <script type="module">
+      import { createGameAudio } from "./index.js";
+
+      const manifest = {
+        attenuation: { min_distance: 1, max_distance: 12 },
+        clips: [
+          { id: "click", source: { tone: { frequency_hz: 1800, duration_ms: 25, waveform: "square", amplitude: 0.25 } } },
+          { id: "hit-a", source: { tone: { frequency_hz: 220, end_frequency_hz: 140, duration_ms: 140, waveform: "saw" } } },
+          { id: "hit-b", source: { tone: { frequency_hz: 247, end_frequency_hz: 150, duration_ms: 140, waveform: "saw" } } },
+          { id: "hurt", source: { tone: { frequency_hz: 660, end_frequency_hz: 220, duration_ms: 300, waveform: "triangle" } } },
+        ],
+        cues: [
+          { kind: "ui.click", clips: ["click"], bus: "ui", priority: 90 },
+          { kind: "combat.hit", clips: ["hit-a", "hit-b"], priority: 70, max_voices: 3, cooldown_ms: 60, pitch_jitter: 0.06, spatial: true },
+          { kind: "player.hurt", clips: ["hurt"], priority: 80, max_voices: 1 },
+        ],
+      };
+
+      const audio = await createGameAudio({ manifest });
+      window.gameAudio = audio;
+      const log = document.getElementById("log");
+      const show = (line) => (log.textContent = `state: ${audio.state()}  voices: ${audio.activeVoices()}\n${line}`);
+      let n = 0;
+      let last = null;
+      let muted = false;
+      show("ready");
+      for (const button of document.querySelectorAll("[data-cue]")) {
+        button.addEventListener("click", () => {
+          const x = button.dataset.x;
+          last = { key: `demo:${++n}`, kind: button.dataset.cue, position: x === undefined ? null : [Number(x), 0, 0] };
+          show(`${last.kind} -> ${audio.trigger(last)}`);
+        });
+      }
+      document.getElementById("replay").addEventListener("click", () => last && show(`replay ${last.key} -> ${audio.trigger(last)}`));
+      document.getElementById("mute").addEventListener("click", () => {
+        muted = !muted;
+        audio.applySettings({ muted });
+        show(`muted: ${muted}`);
+      });
+      setInterval(() => audio.pump(), 100);
+    </script>
+  </body>
+</html>
