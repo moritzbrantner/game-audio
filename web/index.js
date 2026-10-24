@@ -8,8 +8,28 @@
 
 const GESTURES = ["pointerdown", "keydown", "touchend"];
 
+// One wasm instance per page. wasm-bindgen's init only short-circuits after instantiation
+// finishes, so overlapping creates (React StrictMode) would instantiate twice and the second
+// instance would replace the memory the first handle points into (issue #4). Every create
+// shares this promise; the first caller's `wasm` option wins. A failed init is forgotten so
+// a later create can retry.
+let ready = null;
+
+function loadBindings(wasm) {
+  ready ??= (async () => {
+    const bindings = await import("./pkg/game_audio_wasm.js");
+    await bindings.default(wasm === undefined ? undefined : { module_or_path: wasm });
+    return bindings;
+  })().catch((error) => {
+    ready = null;
+    throw error;
+  });
+  return ready;
+}
+
 /**
- * Loads the wasm facade and returns a ready audio handle.
+ * Loads the wasm facade (once per page) and returns a ready audio handle. Concurrent and
+ * repeated calls share one wasm instance; each returns its own independent handle.
  * @param {import("./index.d.ts").GameAudioOptions} options
  * @returns {Promise<import("./index.d.ts").GameAudioHandle>}
  */
@@ -17,8 +37,7 @@ export async function createGameAudio(options) {
   const { manifest, config, baseUrl, wasm } = options;
   let audio = null;
   try {
-    const bindings = await import("./pkg/game_audio_wasm.js");
-    await bindings.default(wasm === undefined ? undefined : { module_or_path: wasm });
+    const bindings = await loadBindings(wasm);
     const text = typeof manifest === "string" ? manifest : JSON.stringify(manifest);
     audio = new bindings.GameAudio(text, config ?? null, baseUrl ?? "");
   } catch (error) {
