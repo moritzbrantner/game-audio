@@ -5,6 +5,7 @@
 
 use std::collections::HashMap;
 use std::fmt;
+use std::io::Cursor;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
@@ -55,6 +56,7 @@ pub struct KiraBackend {
     clips: HashMap<ClipId, StaticSoundData>,
     finished: Vec<VoiceId>,
     asset_root: PathBuf,
+    embedded: HashMap<String, &'static [u8]>,
     errors: Vec<KiraBackendError>,
 }
 
@@ -84,6 +86,7 @@ impl KiraBackend {
             clips: HashMap::new(),
             finished: Vec::new(),
             asset_root: PathBuf::new(),
+            embedded: HashMap::new(),
             errors: Vec::new(),
         })
     }
@@ -91,6 +94,17 @@ impl KiraBackend {
     /// Resolves relative `Url` clip sources against `root`.
     pub fn with_asset_root(mut self, root: impl AsRef<Path>) -> Self {
         self.asset_root = root.as_ref().to_path_buf();
+        self
+    }
+
+    /// Serves `Url` clip sources from bytes compiled into the binary (e.g. `include_bytes!`),
+    /// keyed by the manifest URL exactly. Other URLs still load from the asset root.
+    pub fn with_embedded_clips<S: Into<String>>(
+        mut self,
+        files: impl IntoIterator<Item = (S, &'static [u8])>,
+    ) -> Self {
+        self.embedded
+            .extend(files.into_iter().map(|(url, bytes)| (url.into(), bytes)));
         self
     }
 
@@ -125,9 +139,11 @@ impl KiraBackend {
                     slice: None,
                 })
             }
-            ClipSource::Url(path) => {
-                StaticSoundData::from_file(self.asset_root.join(path)).map_err(|e| e.to_string())
+            ClipSource::Url(path) => match self.embedded.get(path.as_str()) {
+                Some(bytes) => StaticSoundData::from_cursor(Cursor::new(*bytes)),
+                None => StaticSoundData::from_file(self.asset_root.join(path)),
             }
+            .map_err(|e| e.to_string()),
         };
         match data {
             Ok(data) => {
