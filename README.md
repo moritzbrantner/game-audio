@@ -71,6 +71,10 @@ director.trigger(&CueEvent::new("strike:player:1:42:monster:7", "combat.hit").on
 director.pump(&mut backend); // frees finished voices, flushes commands
 ```
 
+A game that compiles its sounds into the binary passes them with
+`KiraBackend::with_embedded_clips([(url, bytes), ...])`; a manifest URL found there is decoded
+from memory, any other URL still loads from the asset root.
+
 Linux needs ALSA headers to build cpal (`libasound2-dev`). Hear it with generated tones and no
 sound files:
 
