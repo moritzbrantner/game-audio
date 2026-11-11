@@ -29,8 +29,8 @@ export class GameAudio {
      * Session replace / seek / reconnect. Seen cue keys are kept.
      */
     reset(): void;
-    setEntityPosition(id: number, position: Float32Array): void;
-    setListener(position: Float32Array, right: Float32Array): void;
+    setEntityPosition(id: number, position: Float32Array | number[]): void;
+    setListener(position: Float32Array | number[], right: Float32Array | number[]): void;
     setSuspended(suspended: boolean): void;
     /**
      * `"running"`, `"suspended"` (locked or hidden) or `"unavailable"`.
@@ -58,10 +58,10 @@ export interface InitOutput {
     readonly memory: WebAssembly.Memory;
     readonly __wbg_gameaudio_free: (a: number, b: number) => void;
     readonly gameaudio_activeVoices: (a: number) => number;
-    readonly gameaudio_applySetting: (a: number, b: number, c: number, d: number, e: number) => number;
-    readonly gameaudio_applySettings: (a: number, b: number, c: number) => void;
+    readonly gameaudio_applySetting: (a: number, b: number, c: number, d: any, e: number) => number;
+    readonly gameaudio_applySettings: (a: number, b: number, c: any) => void;
     readonly gameaudio_forgetCueKeys: (a: number) => void;
-    readonly gameaudio_new: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
+    readonly gameaudio_new: (a: number, b: number, c: number, d: any, e: number, f: number) => void;
     readonly gameaudio_pump: (a: number) => void;
     readonly gameaudio_reset: (a: number) => void;
     readonly gameaudio_setEntityPosition: (a: number, b: number, c: number, d: number, e: number) => void;
@@ -70,16 +70,21 @@ export interface InitOutput {
     readonly gameaudio_state: (a: number, b: number) => void;
     readonly gameaudio_stopEntity: (a: number, b: number, c: number) => void;
     readonly gameaudio_takeErrors: (a: number, b: number) => void;
-    readonly gameaudio_trigger: (a: number, b: number, c: number, d: number) => void;
+    readonly gameaudio_trigger: (a: number, b: number, c: any, d: number) => void;
     readonly gameaudio_unlock: (a: number) => void;
-    readonly __wasm_bindgen_func_elem_846: (a: number, b: number, c: number, d: number) => void;
-    readonly __wasm_bindgen_func_elem_335: (a: number, b: number) => void;
+    readonly __wasm_bindgen_func_elem_870: (a: number, b: number, c: number, d: any) => void;
+    readonly __wasm_bindgen_func_elem_346: (a: number, b: number) => void;
     readonly __wbindgen_export: (a: number, b: number) => number;
     readonly __wbindgen_export2: (a: number, b: number, c: number, d: number) => number;
-    readonly __wbindgen_export3: (a: number) => void;
-    readonly __wbindgen_export4: (a: number, b: number) => void;
+    readonly __wbindgen_export3: (a: number, b: number, c: number) => void;
+    readonly __wbindgen_export4: (a: number) => void;
+    readonly __wbindgen_export5: () => number;
+    readonly __wbindgen_externrefs: WebAssembly.Table;
+    readonly __wbindgen_export6: (a: number, b: number) => void;
     readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
-    readonly __wbindgen_export5: (a: number, b: number, c: number) => void;
+    readonly __wbindgen_export7: (a: number) => void;
+    readonly __wbindgen_export8: (a: number, b: number) => void;
+    readonly __wbindgen_start: () => void;
 }
 
 export type SyncInitInput = BufferSource | WebAssembly.Module;
