@@ -72,7 +72,7 @@ export interface InitOutput {
     readonly gameaudio_takeErrors: (a: number, b: number) => void;
     readonly gameaudio_trigger: (a: number, b: number, c: any, d: number) => void;
     readonly gameaudio_unlock: (a: number) => void;
-    readonly __wasm_bindgen_func_elem_870: (a: number, b: number, c: number, d: any) => void;
+    readonly __wasm_bindgen_func_elem_863: (a: number, b: number, c: number, d: any) => void;
     readonly __wasm_bindgen_func_elem_346: (a: number, b: number) => void;
     readonly __wbindgen_export: (a: number, b: number) => number;
     readonly __wbindgen_export2: (a: number, b: number, c: number, d: number) => number;
